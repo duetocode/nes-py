@@ -1,5 +1,5 @@
 """A method to play gym environments using human IO inputs."""
-import gym
+import gymnasium as gym
 import time
 from pyglet import clock
 from .._image_viewer import ImageViewer

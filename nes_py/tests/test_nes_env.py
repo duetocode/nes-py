@@ -1,6 +1,6 @@
 """Test cases for the NESEnv class."""
 from unittest import TestCase
-import gym
+import gymnasium as gym
 import numpy as np
 from .rom_file_abs_path import rom_file_abs_path
 from nes_py.nes_env import NESEnv
@@ -45,10 +45,9 @@ class ShouldCreateInstanceOfNESEnv(TestCase):
         env.close()
 
 
-def create_smb1_instance():
+def create_smb1_instance(render_mode="human"):
     """Return a new SMB1 instance."""
-    return NESEnv(rom_file_abs_path('super-mario-bros-1.nes'))
-
+    return NESEnv(rom_file_abs_path("super-mario-bros-1.nes"), render_mode=render_mode)
 
 class ShouldReadAndWriteMemory(TestCase):
     def test(self):
@@ -83,16 +82,16 @@ class ShouldStepEnv(TestCase):
                 self.assertIsInstance(state, np.ndarray)
             # sample a random action and check it
             action = env.action_space.sample()
-            self.assertIsInstance(action, int)
+            self.assertIsInstance(action, np.int64)
             # take a step and check the outputs
             output = env.step(action)
             self.assertIsInstance(output, tuple)
             self.assertEqual(5, len(output))
             # check each output
-            state, reward, done, truncated, info = output
+            state, reward, terminated, truncated, info = output
             self.assertIsInstance(state, np.ndarray)
             self.assertIsInstance(reward, float)
-            self.assertIsInstance(done, bool)
+            self.assertIsInstance(terminated, bool)
             self.assertIsInstance(truncated, bool)
             self.assertIsInstance(info, dict)
             # check the render output
@@ -111,7 +110,8 @@ class ShouldStepEnvBackupRestore(TestCase):
             if done:
                 state, _ = env.reset()
                 done = False
-            state, _, done, _, _ = env.step(0)
+            state, _, terminated, truncated, _ = env.step(0)
+            done = terminated or truncated
 
         backup = state.copy()
 

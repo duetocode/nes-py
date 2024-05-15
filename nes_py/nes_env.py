@@ -5,10 +5,10 @@ import itertools
 import os
 import sys
 
-import gym
-from gym.core import ObsType, RenderFrame
-from gym.spaces import Box
-from gym.spaces import Discrete
+import gymnasium as gym
+from gymnasium.core import ObsType, RenderFrame
+from gymnasium.spaces import Box
+from gymnasium.spaces import Discrete
 import numpy as np
 from ._rom import ROM
 from ._image_viewer import ImageViewer
@@ -96,7 +96,8 @@ class NESEnv(gym.Env):
     # relevant meta-data about the environment
     metadata = {
         'render.modes': ['rgb_array', 'human'],
-        'video.frames_per_second': 60
+        'video.frames_per_second': 60,
+        'render_fps': 60,
     }
 
     # the legal range for rewards for this environment
@@ -113,7 +114,7 @@ class NESEnv(gym.Env):
     # action space is a bitmap of button press values for the 8 NES buttons
     action_space = Discrete(256)
 
-    def __init__(self, rom_path):
+    def __init__(self, rom_path, render_mode='human'):
         """
         Create a new NES environment.
 
@@ -161,6 +162,7 @@ class NESEnv(gym.Env):
         self.controllers = [self._controller_buffer(port) for port in range(2)]
         self.screen = self._screen_buffer()
         self.ram = self._ram_buffer()
+        self.render_mode = render_mode
 
     def _screen_buffer(self):
         """Setup the screen buffer from the C++ code."""
