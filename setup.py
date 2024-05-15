@@ -41,7 +41,7 @@ setup(
     description='An NES Emulator and OpenAI Gym interface',
     long_description=README,
     long_description_content_type='text/markdown',
-    keywords='NES Emulator OpenAI-Gym',
+    keywords='NES Emulator OpenAI-Gym Gynasium',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

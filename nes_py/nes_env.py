@@ -96,6 +96,7 @@ class NESEnv(gym.Env):
     # relevant meta-data about the environment
     metadata = {
         'render.modes': ['rgb_array', 'human'],
+        'render_modes': ['rgb_array', 'human'],
         'video.frames_per_second': 60,
         'render_fps': 60,
     }
