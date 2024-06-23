@@ -73,7 +73,7 @@ class ShouldResetAndCloseEnv(TestCase):
 
 class ShouldStepEnv(TestCase):
     def test(self):
-        env = create_smb1_instance()
+        env = create_smb1_instance("rgb_array")
         done = True
         for _ in range(500):
             if done:
@@ -95,7 +95,7 @@ class ShouldStepEnv(TestCase):
             self.assertIsInstance(truncated, bool)
             self.assertIsInstance(info, dict)
             # check the render output
-            render = env.render('rgb_array')
+            render = env.render()
             self.assertIsInstance(render, np.ndarray)
         env.reset()
         env.close()
@@ -125,5 +125,32 @@ class ShouldStepEnvBackupRestore(TestCase):
 
         self.assertFalse(np.array_equal(backup, state))
         env._restore()
+        self.assertTrue(np.array_equal(backup, env.screen))
+        env.close()
+
+class ShouldStepEnvSaveLoadState(TestCase):
+    def test(self):
+        done = True
+        env = create_smb1_instance()
+
+        for _ in range(250):
+            if done:
+                state, _ = env.reset()
+                done = False
+            state, _, terminated, truncated, _ = env.step(0)
+            done = terminated or truncated
+
+        backup = state.copy()
+
+        saved_state = env.save_state()
+
+        for _ in range(250):
+            if done:
+                state = env.reset()
+                done = False
+            state, _, done, _, _ = env.step(0)
+
+        self.assertFalse(np.array_equal(backup, state))
+        env.load_state(saved_state)
         self.assertTrue(np.array_equal(backup, env.screen))
         env.close()

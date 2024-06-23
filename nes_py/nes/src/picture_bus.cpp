@@ -8,6 +8,8 @@
 #include "picture_bus.hpp"
 #include "log.hpp"
 
+#include <algorithm>
+
 namespace NES {
 
 NES_Byte PictureBus::read(NES_Address address) {
@@ -83,6 +85,38 @@ void PictureBus::update_mirroring() {
                 mapper->getNameTableMirroring() <<
                 std::endl;
     }
+}
+
+PictureBus::PictureBus(const PictureBus& other) :
+    ram(other.ram),
+    palette(other.palette),
+    mapper(other.mapper) {
+        std::copy(std::begin(other.name_tables), std::end(other.name_tables), std::begin(name_tables));
+}
+
+PictureBus::PictureBus(PictureBus&& other) noexcept:
+    ram(std::move(other.ram)),
+    palette(std::move(other.palette)),
+    mapper(other.mapper) {
+        std::copy(std::begin(other.name_tables), std::end(other.name_tables), std::begin(name_tables));
+}
+
+PictureBus& PictureBus::operator=(const PictureBus& other) {
+    if (this == &other) return *this;
+    ram = other.ram;
+    palette = other.palette;
+    mapper = other.mapper;
+    std::copy(std::begin(other.name_tables), std::end(other.name_tables), std::begin(name_tables));
+    return *this;
+}
+
+PictureBus& PictureBus::operator=(PictureBus&& other) noexcept {
+    if (this == &other) return *this;
+    ram = std::move(other.ram);
+    palette = std::move(other.palette);
+    mapper = other.mapper;
+    std::copy(std::begin(other.name_tables), std::end(other.name_tables), std::begin(name_tables));
+    return *this;
 }
 
 }  // namespace NES

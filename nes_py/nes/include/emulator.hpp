@@ -19,6 +19,13 @@
 
 namespace NES {
 
+struct SavedState {
+    MainBus bus;
+    PictureBus picture_bus;
+    CPU cpu;
+    PPU ppu;
+};
+
 /// An NES Emulator and OpenAI Gym interface
 class Emulator {
  private:
@@ -46,6 +53,9 @@ class Emulator {
     CPU backup_cpu;
     /// the emulators' PPU
     PPU backup_ppu;
+
+    /// @brief setup the callbacks for the internal
+    void setup_callbacks();
 
  public:
     /// The width of the NES screen in pixels
@@ -101,6 +111,10 @@ class Emulator {
         cpu = backup_cpu;
         ppu = backup_ppu;
     }
+
+    SavedState* save_state();
+    void load_state(SavedState* state);
+
 };
 
 }  // namespace NES

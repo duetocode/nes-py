@@ -91,4 +91,47 @@ void MainBus::set_mapper(Mapper* mapper) {
         extended_ram.resize(0x2000);
 }
 
+MainBus::~MainBus() {
+    mapper = nullptr;
+    write_callbacks.clear();
+    read_callbacks.clear();
+}
+
+MainBus::MainBus(const MainBus& other) {
+    ram = other.ram;
+    extended_ram = other.extended_ram;
+    mapper = other.mapper;
+}
+
+MainBus::MainBus(MainBus&& other) noexcept{
+    ram = std::move(other.ram);
+    extended_ram = std::move(other.extended_ram);
+    mapper = other.mapper;
+    other.mapper = nullptr;
+    write_callbacks = std::move(other.write_callbacks);  
+    read_callbacks = std::move(other.read_callbacks);
+}
+
+MainBus& MainBus::operator=(const MainBus& other) {
+    if (this == &other)
+        return *this;
+    ram = other.ram;
+    extended_ram = other.extended_ram;
+    mapper = other.mapper;
+    return *this;
+}
+
+MainBus& MainBus::operator=(MainBus&& other) noexcept{
+    if (this == &other)
+        return *this;
+    ram = std::move(other.ram);
+    extended_ram = std::move(other.extended_ram);
+    mapper = other.mapper;
+    other.mapper = nullptr;
+    write_callbacks = std::move(other.write_callbacks);  
+    read_callbacks = std::move(other.read_callbacks);
+    return *this;
+}
+
+
 }  // namespace NES

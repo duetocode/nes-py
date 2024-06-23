@@ -64,6 +64,13 @@ class MainBus {
     /// Initialize a new main bus.
     MainBus() : ram(0x800, 0), mapper(nullptr) { }
 
+    ~MainBus();
+    MainBus(const MainBus& other);
+    MainBus(MainBus&& other) noexcept;
+    MainBus& operator=(const MainBus& other);
+    MainBus& operator=(MainBus&& other) noexcept;
+
+
     /// Return a 8-bit pointer to the RAM buffer's first address.
     ///
     /// @return a 8-bit pointer to the RAM buffer's first address

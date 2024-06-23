@@ -107,6 +107,12 @@ class PPU {
     /// Initialize a new PPU.
     PPU() : sprite_memory(64 * 4) { }
 
+    ~PPU(){}
+    PPU(const PPU& other);
+    PPU(PPU&& other) noexcept;
+    PPU& operator=(const PPU& other);
+    PPU& operator=(PPU&& other) noexcept;
+
     /// Perform a single cycle on the PPU.
     void cycle(PictureBus& bus);
 

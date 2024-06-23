@@ -13,6 +13,17 @@ namespace NES {
 
 Emulator::Emulator(std::string rom_path) {
     // set the read callbacks
+    setup_callbacks();
+    // load the ROM from disk, expect that the Python code has validated it
+    cartridge.loadFromFile(rom_path);
+    // create the mapper based on the mapper ID in the iNES header of the ROM
+    auto mapper = MapperFactory(&cartridge, [&](){ picture_bus.update_mirroring(); });
+    // give the IO buses a pointer to the mapper
+    bus.set_mapper(mapper);
+    picture_bus.set_mapper(mapper);
+}
+
+void Emulator::setup_callbacks() {
     bus.set_read_callback(PPUSTATUS, [&](void) { return ppu.get_status();          });
     bus.set_read_callback(PPUDATA,   [&](void) { return ppu.get_data(picture_bus); });
     bus.set_read_callback(JOY1,      [&](void) { return controllers[0].read();     });
@@ -30,13 +41,6 @@ Emulator::Emulator(std::string rom_path) {
     bus.set_write_callback(OAMDATA,  [&](NES_Byte b) { ppu.set_OAM_data(b);                                        });
     // set the interrupt callback for the PPU
     ppu.set_interrupt_callback([&]() { cpu.interrupt(bus, CPU::NMI_INTERRUPT); });
-    // load the ROM from disk, expect that the Python code has validated it
-    cartridge.loadFromFile(rom_path);
-    // create the mapper based on the mapper ID in the iNES header of the ROM
-    auto mapper = MapperFactory(&cartridge, [&](){ picture_bus.update_mirroring(); });
-    // give the IO buses a pointer to the mapper
-    bus.set_mapper(mapper);
-    picture_bus.set_mapper(mapper);
 }
 
 void Emulator::step() {
@@ -48,6 +52,24 @@ void Emulator::step() {
         ppu.cycle(picture_bus);
         cpu.cycle(bus);
     }
+}
+
+SavedState* Emulator::save_state() {
+    SavedState* state = new SavedState();
+    state->bus = bus;
+    state->picture_bus = picture_bus;
+    state->cpu = cpu;
+    state->ppu = ppu;
+
+    return state;
+}
+
+void Emulator::load_state(SavedState* state) {
+    bus = state->bus;
+    picture_bus = state->picture_bus;
+    cpu = state->cpu;
+    ppu = state->ppu;
+    setup_callbacks();
 }
 
 }  // namespace NES

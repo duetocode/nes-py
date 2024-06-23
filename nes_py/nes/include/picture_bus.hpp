@@ -31,6 +31,12 @@ class PictureBus {
     /// Initialize a new picture bus.
     PictureBus() : ram(0x800), palette(0x20), mapper(nullptr) { }
 
+    ~PictureBus() {}
+    PictureBus(const PictureBus& other);
+    PictureBus(PictureBus&& other) noexcept;
+    PictureBus& operator=(const PictureBus& other);
+    PictureBus& operator=(PictureBus&& other) noexcept;
+
     /// Read a byte from an address on the VRAM.
     ///
     /// @param address the 16-bit address of the byte to read in the VRAM
