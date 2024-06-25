@@ -9,6 +9,7 @@
 #define EMULATOR_HPP
 
 #include <string>
+#include <memory>
 #include "common.hpp"
 #include "cartridge.hpp"
 #include "controller.hpp"
@@ -45,14 +46,7 @@ class Emulator {
     /// the emulators' PPU
     PPU ppu;
 
-    /// the main data bus of the emulator
-    MainBus backup_bus;
-    /// the picture bus from the PPU of the emulator
-    PictureBus backup_picture_bus;
-    /// The emulator's CPU
-    CPU backup_cpu;
-    /// the emulators' PPU
-    PPU backup_ppu;
+    SavedState savedState;
 
     /// @brief setup the callbacks for the internal
     void setup_callbacks();
@@ -98,18 +92,12 @@ class Emulator {
 
     /// Create a backup state on the emulator.
     inline void backup() {
-        backup_bus = bus;
-        backup_picture_bus = picture_bus;
-        backup_cpu = cpu;
-        backup_ppu = ppu;
+        savedState = *save_state();
     }
 
     /// Restore the backup state on the emulator.
     inline void restore() {
-        bus = backup_bus;
-        picture_bus = backup_picture_bus;
-        cpu = backup_cpu;
-        ppu = backup_ppu;
+        load_state(&savedState);
     }
 
     SavedState* save_state();
