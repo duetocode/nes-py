@@ -72,4 +72,21 @@ void Emulator::load_state(SavedState* state) {
     setup_callbacks();
 }
 
+// Serializable 
+
+void Emulator::serialize(std::vector<uint8_t>& buffer) {
+    bus.serialize(buffer);
+    picture_bus.serialize(buffer);
+    cpu.serialize(buffer);
+    ppu.serialize(buffer);
+}
+
+std::span<uint8_t> Emulator::deserialize(std::span<uint8_t> buffer) {
+    buffer = bus.deserialize(buffer);
+    buffer = picture_bus.deserialize(buffer);
+    buffer = cpu.deserialize(buffer);
+    buffer = ppu.deserialize(buffer);
+    return buffer;
+}
+
 }  // namespace NES

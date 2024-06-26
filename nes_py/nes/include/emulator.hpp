@@ -28,7 +28,7 @@ struct SavedState {
 };
 
 /// An NES Emulator and OpenAI Gym interface
-class Emulator {
+class Emulator : public Serializable{
  private:
     /// The number of cycles in 1 frame
     static const int CYCLES_PER_FRAME = 29781;
@@ -102,6 +102,10 @@ class Emulator {
 
     SavedState* save_state();
     void load_state(SavedState* state);
+
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
+
 
 };
 

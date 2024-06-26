@@ -77,6 +77,13 @@ _LIB.SaveState.restype = ctypes.c_void_p
 # setup the argument and return types for LoadState
 _LIB.LoadState.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 _LIB.LoadState.restype = None
+# setup serialization and deserialization functions
+_LIB.serialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+_LIB.serialize.restype = ctypes.POINTER(ctypes.c_char)
+_LIB.free_buffer.argtypes = [ctypes.c_char_p]
+_LIB.free_buffer.restype = None
+_LIB.deserialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_char), ctypes.c_size_t]
+_LIB.deserialize.restype = None
 
 
 # height in pixels of the NES screen
@@ -460,6 +467,17 @@ class NESEnv(gym.Env):
     def load_state(self, state: Any):
         _LIB.LoadState(self._env, state)
 
+    def serialize(self) -> bytes:
+        size = ctypes.c_size_t()
+        buf = _LIB.serialize(self._env, ctypes.byref(size))
+        serialized_data = bytes(ctypes.string_at(buf, size.value))
+        _LIB.free_buffer(buf)
+        return serialized_data
+
+    def deserialize(self, data: bytes):
+        buf = ctypes.create_string_buffer(data)
+        _LIB.deserialize(self._env, buf, len(data))
+    
 
 # explicitly define the outward facing API of this module
 __all__ = [NESEnv.__name__]

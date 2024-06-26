@@ -91,6 +91,31 @@ extern "C" {
     EXP void LoadState(NES::Emulator* emu, NES::SavedState* state) {
         emu->load_state(state);
     }
+
+    // Serialization
+    EXP char* serialize(NES::Emulator* emu, size_t* size_out) {
+        std::vector<uint8_t> data;
+        emu->serialize(data);
+
+        char* buffer = new char[data.size()];
+        std::copy(data.begin(), data.end(), buffer);
+
+        if (size_out) {
+            *size_out = data.size();
+        }
+
+        return buffer;
+    }
+
+    EXP void free_buffer(char* buffer) {
+        delete[] buffer;
+    }
+
+    EXP void deserialize(NES::Emulator* emu, char* buffer, size_t size) {
+        std::vector<uint8_t> data(buffer, buffer + size);
+        emu->deserialize(data);
+    }
+
 }
 
 // un-define the macro

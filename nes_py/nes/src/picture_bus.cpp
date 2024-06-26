@@ -119,4 +119,21 @@ PictureBus& PictureBus::operator=(PictureBus&& other) noexcept {
     return *this;
 }
 
+void PictureBus::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(ram, buffer);
+    serialize_vector(palette, buffer);
+    for (int i = 0; i < 4; i++) {
+        serialize_int(name_tables[i], buffer);
+    }
+}
+
+std::span<uint8_t> PictureBus::deserialize(std::span<uint8_t> buffer) {
+    buffer = deserialize_vector(buffer, ram);
+    buffer = deserialize_vector(buffer, palette);
+    for (int i = 0; i < 4; i++) {
+        deserialize_int(buffer, name_tables[i]);
+    }
+    return buffer;
+}
+
 }  // namespace NES

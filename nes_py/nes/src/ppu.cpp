@@ -548,4 +548,87 @@ PPU& PPU::operator=(PPU&& other) noexcept{
     return *this;
 }
 
+void PPU::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(sprite_memory, buffer);
+    serialize_vector(scanline_sprites, buffer);
+
+    serialize_enum(pipeline_state, buffer);
+
+    serialize_int(cycles, buffer);
+    serialize_int(scanline, buffer);
+    serialize_bool(is_even_frame, buffer);
+    /// Status
+    serialize_bool(is_vblank, buffer);
+    serialize_bool(is_sprite_zero_hit, buffer);
+    /// Registers
+    serialize_int(data_address, buffer);
+    serialize_int(temp_address, buffer);
+    serialize_int(fine_x_scroll, buffer);
+    serialize_bool(is_first_write, buffer);
+    serialize_int(data_buffer, buffer);
+    serialize_int(sprite_data_address, buffer);
+    /// Mask
+    serialize_bool(is_showing_sprites, buffer);
+    serialize_bool(is_showing_background, buffer);
+    serialize_bool(is_hiding_edge_sprites, buffer);
+    serialize_bool(is_hiding_edge_background, buffer);
+    /// Setup flags and variables
+    serialize_bool(is_long_sprites, buffer);
+    serialize_bool(is_interrupting, buffer);
+
+    serialize_enum(background_page, buffer);
+    serialize_enum(sprite_page, buffer);
+
+    serialize_int(data_address_increment, buffer);
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            serialize_int(screen[i][j], buffer);
+        }
+    }
+}
+
+std::span<uint8_t> PPU::deserialize(std::span<uint8_t> buffer) {
+    buffer = deserialize_vector(buffer, sprite_memory);
+    buffer = deserialize_vector(buffer, scanline_sprites);
+
+    deserialize_enum(buffer, pipeline_state);
+
+    deserialize_int(buffer, cycles);
+    deserialize_int(buffer, scanline);
+    deserialize_bool(buffer, is_even_frame);
+    /// Status
+    deserialize_bool(buffer, is_vblank);
+    deserialize_bool(buffer, is_sprite_zero_hit);
+    /// Registers
+    deserialize_int(buffer, data_address);
+    deserialize_int(buffer, temp_address);
+    deserialize_int(buffer, fine_x_scroll);
+    deserialize_bool(buffer, is_first_write);
+    deserialize_int(buffer, data_buffer);
+    deserialize_int(buffer, sprite_data_address);
+    /// Mask
+    deserialize_bool(buffer, is_showing_sprites);
+    deserialize_bool(buffer, is_showing_background);
+    deserialize_bool(buffer, is_hiding_edge_sprites);
+    deserialize_bool(buffer, is_hiding_edge_background);
+    /// Setup flags and variables
+    deserialize_bool(buffer, is_long_sprites);
+    deserialize_bool(buffer, is_interrupting);
+
+    deserialize_enum(buffer, background_page);
+    deserialize_enum(buffer, sprite_page);
+
+    deserialize_int(buffer, data_address_increment);
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            deserialize_int(buffer, screen[i][j]);
+        }
+    }
+
+    return buffer;
+}
+
+
 }  // namespace NES

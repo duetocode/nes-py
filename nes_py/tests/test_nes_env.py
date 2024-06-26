@@ -154,3 +154,30 @@ class ShouldStepEnvSaveLoadState(TestCase):
         env.load_state(saved_state)
         self.assertTrue(np.array_equal(backup, env.screen))
         env.close()
+
+class ShouldStepEnvSerializeDeserializeState(TestCase):
+    def test(self):
+        done = True
+        env = create_smb1_instance()
+
+        for _ in range(250):
+            if done:
+                state, _ = env.reset()
+                done = False
+            state, _, terminated, truncated, _ = env.step(0)
+            done = terminated or truncated
+
+        backup = state.copy()
+
+        data = env.serialize()
+
+        for _ in range(250):
+            if done:
+                state = env.reset()
+                done = False
+            state, _, done, _, _ = env.step(0)
+
+        self.assertFalse(np.array_equal(backup, state))
+        env.deserialize(data)
+        self.assertTrue(np.array_equal(backup, env.screen))
+        env.close()

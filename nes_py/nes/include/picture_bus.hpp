@@ -16,7 +16,7 @@
 namespace NES {
 
 /// The bus for graphical data to travel along
-class PictureBus {
+class PictureBus : public Serializable {
  private:
     /// the VRAM on the picture bus
     std::vector<NES_Byte> ram;
@@ -72,6 +72,11 @@ class PictureBus {
 
     /// Update the mirroring and name table from the mapper.
     void update_mirroring();
+
+    /// Serializable
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
+
 };
 
 }  // namespace NES

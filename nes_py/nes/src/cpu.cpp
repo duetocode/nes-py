@@ -560,4 +560,27 @@ void CPU::cycle(MainBus &bus) {
         std::cout << "failed to execute opcode: " << std::hex << +op << std::endl;
 }
 
+/// Serializable
+void CPU::serialize(std::vector<uint8_t>& buffer) {
+    serialize_int(register_PC, buffer);
+    serialize_int(register_SP, buffer);
+    serialize_int(register_A, buffer);
+    serialize_int(register_X, buffer);
+    serialize_int(register_Y, buffer);
+    serialize_int(flags.byte, buffer);
+    serialize_int(skip_cycles, buffer);
+    serialize_int(cycles, buffer);
+}
+
+std::span<uint8_t> CPU::deserialize(std::span<uint8_t> buffer) {
+    deserialize_int(buffer, register_PC);
+    deserialize_int(buffer, register_SP);
+    deserialize_int(buffer, register_A);
+    deserialize_int(buffer, register_X);
+    deserialize_int(buffer, register_Y);
+    deserialize_int<NES_Byte>(buffer, flags.byte);
+    deserialize_int(buffer, skip_cycles);
+    deserialize_int(buffer, cycles);
+    return buffer;
+}
 }  // namespace NES

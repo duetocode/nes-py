@@ -133,5 +133,20 @@ MainBus& MainBus::operator=(MainBus&& other) noexcept{
     return *this;
 }
 
+/// Serializable
+
+void MainBus::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(ram, buffer);
+    serialize_vector(extended_ram, buffer);
+}
+
+std::span<uint8_t> MainBus::deserialize(std::span<uint8_t> buffer) {
+    // read the RAM
+    buffer = deserialize_vector(buffer, ram);
+    // read the extended RAM
+    buffer = deserialize_vector(buffer, extended_ram);
+
+    return buffer;
+}
 
 }  // namespace NES
