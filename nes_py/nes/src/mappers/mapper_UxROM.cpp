@@ -46,4 +46,21 @@ void MapperUxROM::writeCHR(NES_Address address, NES_Byte value) {
             std::endl;
 }
 
+/// Serializable
+
+void MapperUxROM::serialize(std::vector<uint8_t>& buffer) {
+    serialize_bool(has_character_ram, buffer);
+    serialize_int(last_bank_pointer, buffer);
+    serialize_int(select_prg, buffer);
+    serialize_vector(character_ram, buffer);
+}
+
+std::span<uint8_t> MapperUxROM::deserialize(std::span<uint8_t> buffer) {
+    deserialize_bool(buffer, has_character_ram);
+    deserialize_int(buffer, last_bank_pointer);
+    deserialize_int(buffer, select_prg);
+    deserialize_vector(buffer, character_ram);
+    return buffer;
+}
+
 }  // namespace NES

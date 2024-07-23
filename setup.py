@@ -9,11 +9,6 @@ os.environ['CC'] = 'g++'
 os.environ['CCX'] = 'g++'
 
 
-# read the contents from the README file
-with open('README.md') as README_file:
-    README = README_file.read()
-
-
 # The prefix name for the .so library to build. It will follow the format
 # lib_nes_env.*.so where the * changes depending on the build system
 LIB_NAME = 'nes_py.lib_nes_env'
@@ -26,7 +21,7 @@ SOURCES = glob('nes_py/nes/src/*.cpp') + glob('nes_py/nes/src/mappers/*.cpp')
 # headers with sdist
 INCLUDE_DIRS = ['nes_py/nes/include']
 # Build arguments to pass to the compiler
-EXTRA_COMPILE_ARGS = ['-std=c++1y', '-pipe', '-O3']
+EXTRA_COMPILE_ARGS = ['-std=c++2a', '-pipe', '-O3']
 # The official extension using the name, source, headers, and build args
 LIB_NES_ENV = Extension(LIB_NAME,
     sources=SOURCES,
@@ -36,49 +31,7 @@ LIB_NES_ENV = Extension(LIB_NAME,
 
 
 setup(
-    name='nes_py',
-    version='9.0.0',
-    description='An NES Emulator and OpenAI Gym interface',
-    long_description=README,
-    long_description_content_type='text/markdown',
-    keywords='NES Emulator OpenAI-Gym Gynasium',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: Microsoft :: Windows',
-        'Programming Language :: C++',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Topic :: Games/Entertainment',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: System :: Emulators',
-    ],
-    url='https://github.com/Kautenja/nes-py',
-    author='Christian Kauten',
-    author_email='kautencreations@gmail.com',
-    license='MIT',
     packages=find_packages(exclude=['tests', '*.tests', '*.tests.*']),
     ext_modules=[LIB_NES_ENV],
     zip_safe=False,
-    install_requires=[
-        'gymnasium>=0.29.1',
-        'numpy>=1.18.5',
-        'pyglet<=1.5.21,>=1.4.0',
-        'tqdm>=4.48.2',
-    ],
-    entry_points={
-        'console_scripts': [
-            'nes_py = nes_py.app.cli:main',
-        ],
-    },
 )

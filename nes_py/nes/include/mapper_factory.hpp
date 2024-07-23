@@ -7,7 +7,6 @@
 
 #ifndef MAPPER_FACTORY_HPP
 #define MAPPER_FACTORY_HPP
-
 #include "mapper.hpp"
 #include "mappers/mapper_NROM.hpp"
 #include "mappers/mapper_SxROM.hpp"

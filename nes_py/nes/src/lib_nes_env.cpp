@@ -34,12 +34,12 @@ extern "C" {
     }
 
     /// Initialize a new emulator and return a pointer to it
-    EXP NES::Emulator* Initialize(wchar_t* path) {
+    EXP NES::Emulator* Initialize(wchar_t* path, bool headless = false) {
         // convert the c string to a c++ std string data structure
         std::wstring ws_rom_path(path);
         std::string rom_path(ws_rom_path.begin(), ws_rom_path.end());
         // create a new emulator with the given ROM path
-        return new NES::Emulator(rom_path);
+        return new NES::Emulator(rom_path, headless);
     }
 
     /// Return a pointer to a controller on the machine
@@ -81,6 +81,39 @@ extern "C" {
     EXP void Close(NES::Emulator* emu) {
         delete emu;
     }
+
+    /// Save the state of the emulator
+    EXP NES::SavedState* SaveState(NES::Emulator* emu) {
+        return emu->save_state();
+    }
+
+    /// Load the state of the emulator from a saved state
+    EXP void LoadState(NES::Emulator* emu, NES::SavedState* state) {
+        emu->load_state(state);
+    }
+
+    // Serialization
+    EXP uint8_t* serialize(NES::Emulator* emu, size_t* size_out) {
+        std::vector<uint8_t> data;
+        emu->serialize(data);
+
+        uint8_t* buffer = new uint8_t[data.size()];
+        std::copy(data.begin(), data.end(), buffer);
+
+        *size_out = data.size();
+
+        return buffer;
+    }
+
+    EXP void free_buffer(uint8_t* buffer) {
+        delete[] buffer;
+    }
+
+    EXP void deserialize(NES::Emulator* emu, uint8_t* buffer, size_t size) {
+        std::vector<uint8_t> data(buffer, buffer + size);
+        emu->deserialize(data);
+    }
+
 }
 
 // un-define the macro

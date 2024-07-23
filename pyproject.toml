@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nes_py"
+version = "9.2.0"
+description = "An NES Emulator and OpenAI Gym interface"
+readme = "README.md"
+keywords = ["NES", "Emulator", "OpenAI-Gym", "Gymnasium"]
+classifiers = [
+    "Development Status :: 9 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    'Programming Language :: C++',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Topic :: Games/Entertainment',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: System :: Emulators',
+]
+license = {file = "LICENSE"}
+authors = [{name = "Christian Kauten", email = "kautencreations@gmail.com"}]
+urls = {homepage = "https://github.com/Kautenja/nes-py"}
+
+[project.optional-dependencies]
+extras = [
+    "gymnasium>=0.29.1",
+    "numpy>=1.18.5",
+    "pyglet<=1.5.21,>=1.4.0",
+    "tqdm>=4.48.2",
+]
+
+[project.scripts]
+nes_py = "nes_py.app.cli:main"

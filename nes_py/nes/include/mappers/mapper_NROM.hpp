@@ -35,7 +35,7 @@ class MapperNROM : public Mapper {
     /// @param address the 16-bit address of the byte to read
     /// @return the byte located at the given address in PRG RAM
     ///
-    inline NES_Byte readPRG(NES_Address address) {
+    inline NES_Byte readPRG(NES_Address address) override {
         if (!is_one_bank)
             return cartridge->getROM()[address - 0x8000];
         else  // mirrored
@@ -47,14 +47,14 @@ class MapperNROM : public Mapper {
     /// @param address the 16-bit address to write to
     /// @param value the byte to write to the given address
     ///
-    void writePRG(NES_Address address, NES_Byte value);
+    void writePRG(NES_Address address, NES_Byte value) override;
 
     /// Read a byte from the CHR RAM.
     ///
     /// @param address the 16-bit address of the byte to read
     /// @return the byte located at the given address in CHR RAM
     ///
-    inline NES_Byte readCHR(NES_Address address) {
+    inline NES_Byte readCHR(NES_Address address) override {
         if (has_character_ram)
             return character_ram[address];
         else
@@ -66,7 +66,11 @@ class MapperNROM : public Mapper {
     /// @param address the 16-bit address to write to
     /// @param value the byte to write to the given address
     ///
-    void writeCHR(NES_Address address, NES_Byte value);
+    void writeCHR(NES_Address address, NES_Byte value) override;
+
+    /// Serializable
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
 };
 
 }  // namespace NES

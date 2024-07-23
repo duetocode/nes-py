@@ -91,4 +91,62 @@ void MainBus::set_mapper(Mapper* mapper) {
         extended_ram.resize(0x2000);
 }
 
+MainBus::~MainBus() {
+    mapper = nullptr;
+    write_callbacks.clear();
+    read_callbacks.clear();
+}
+
+MainBus::MainBus(const MainBus& other) {
+    ram = other.ram;
+    extended_ram = other.extended_ram;
+    mapper = other.mapper;
+}
+
+MainBus::MainBus(MainBus&& other) noexcept{
+    ram = std::move(other.ram);
+    extended_ram = std::move(other.extended_ram);
+    mapper = other.mapper;
+    other.mapper = nullptr;
+    write_callbacks = std::move(other.write_callbacks);  
+    read_callbacks = std::move(other.read_callbacks);
+}
+
+MainBus& MainBus::operator=(const MainBus& other) {
+    if (this == &other)
+        return *this;
+    ram = other.ram;
+    extended_ram = other.extended_ram;
+    mapper = other.mapper;
+    return *this;
+}
+
+MainBus& MainBus::operator=(MainBus&& other) noexcept{
+    if (this == &other)
+        return *this;
+    ram = std::move(other.ram);
+    extended_ram = std::move(other.extended_ram);
+    mapper = other.mapper;
+    other.mapper = nullptr;
+    write_callbacks = std::move(other.write_callbacks);  
+    read_callbacks = std::move(other.read_callbacks);
+    return *this;
+}
+
+/// Serializable
+
+void MainBus::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(ram, buffer);
+    serialize_vector(extended_ram, buffer);
+}
+
+std::span<uint8_t> MainBus::deserialize(std::span<uint8_t> buffer) {
+    // read the RAM
+    buffer = deserialize_vector(buffer, ram);
+    // read the extended RAM
+    buffer = deserialize_vector(buffer, extended_ram);
+
+    return buffer;
+}
+
 }  // namespace NES

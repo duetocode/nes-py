@@ -25,8 +25,8 @@ const int SCANLINE_END_CYCLE = 341;
 const int FRAME_END_SCANLINE = 261;
 
 /// The Picture Processing Unit (PPU) for the NES
-class PPU {
- private:
+class PPU : Serializable{
+ protected:
     /// The callback to fire when entering vertical blanking mode
     std::function<void(void)> vblank_callback;
     /// The OAM memory (sprites)
@@ -107,8 +107,14 @@ class PPU {
     /// Initialize a new PPU.
     PPU() : sprite_memory(64 * 4) { }
 
+    virtual ~PPU(){}
+    PPU(const PPU& other);
+    PPU(PPU&& other) noexcept;
+    PPU& operator=(const PPU& other);
+    PPU& operator=(PPU&& other) noexcept;
+
     /// Perform a single cycle on the PPU.
-    void cycle(PictureBus& bus);
+    virtual void cycle(PictureBus& bus);
 
     /// Reset the PPU.
     void reset();
@@ -182,6 +188,10 @@ class PPU {
 
     /// Return a pointer to the screen buffer.
     inline NES_Pixel* get_screen_buffer() { return *screen; }
+
+    /// Serializable
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
 };
 
 }  // namespace NES

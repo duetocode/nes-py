@@ -24,7 +24,7 @@ enum NameTableMirroring {
 };
 
 /// An abstraction of a general hardware mapper for different NES cartridges
-class Mapper {
+class Mapper : public Serializable {
  protected:
     /// The cartridge this mapper associates with
     Cartridge* cartridge;
@@ -35,6 +35,8 @@ class Mapper {
     /// @param game a reference to a cartridge for the mapper to access
     ///
     explicit Mapper(Cartridge* game) : cartridge(game) { }
+
+    virtual ~Mapper() {cartridge = nullptr;}
 
     /// Return the name table mirroring mode of this mapper.
     inline virtual NameTableMirroring getNameTableMirroring() {
@@ -71,6 +73,7 @@ class Mapper {
     /// @param value the byte to write to the given address
     ///
     virtual void writeCHR(NES_Address address, NES_Byte value) = 0;
+
 };
 
 }  // namespace NES

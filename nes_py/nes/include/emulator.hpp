@@ -19,13 +19,22 @@
 
 namespace NES {
 
+struct SavedState {
+    MainBus bus;
+    PictureBus picture_bus;
+    CPU cpu;
+    PPU ppu;
+};
+
 /// An NES Emulator and OpenAI Gym interface
-class Emulator {
+class Emulator : public Serializable{
  private:
     /// The number of cycles in 1 frame
     static const int CYCLES_PER_FRAME = 29781;
     /// the virtual cartridge with ROM and mapper data
     Cartridge cartridge;
+    /// the mapper
+    Mapper* mapper;
     /// the 2 controllers on the emulator
     Controller controllers[2];
 
@@ -36,16 +45,12 @@ class Emulator {
     /// The emulator's CPU
     CPU cpu;
     /// the emulators' PPU
-    PPU ppu;
+    PPU* ppu;
 
-    /// the main data bus of the emulator
-    MainBus backup_bus;
-    /// the picture bus from the PPU of the emulator
-    PictureBus backup_picture_bus;
-    /// The emulator's CPU
-    CPU backup_cpu;
-    /// the emulators' PPU
-    PPU backup_ppu;
+    SavedState savedState;
+
+    /// @brief setup the callbacks for the internal
+    void setup_callbacks();
 
  public:
     /// The width of the NES screen in pixels
@@ -57,13 +62,16 @@ class Emulator {
     ///
     /// @param rom_path the path to the ROM for the emulator to run
     ///
-    explicit Emulator(std::string rom_path);
+    explicit Emulator(std::string rom_path, bool headless = false);
+    virtual ~Emulator() { delete mapper; delete ppu; }
 
     /// Return a 32-bit pointer to the screen buffer's first address.
     ///
     /// @return a 32-bit pointer to the screen buffer's first address
     ///
-    inline NES_Pixel* get_screen_buffer() { return ppu.get_screen_buffer(); }
+    inline NES_Pixel* get_screen_buffer() { 
+        return ppu->get_screen_buffer(); 
+    }
 
     /// Return a 8-bit pointer to the RAM buffer's first address.
     ///
@@ -81,26 +89,28 @@ class Emulator {
     }
 
     /// Load the ROM into the NES.
-    inline void reset() { cpu.reset(bus); ppu.reset(); }
+    inline void reset() { cpu.reset(bus); ppu->reset(); }
 
     /// Perform a step on the emulator, i.e., a single frame.
     void step();
 
     /// Create a backup state on the emulator.
     inline void backup() {
-        backup_bus = bus;
-        backup_picture_bus = picture_bus;
-        backup_cpu = cpu;
-        backup_ppu = ppu;
+        savedState = *save_state();
     }
 
     /// Restore the backup state on the emulator.
     inline void restore() {
-        bus = backup_bus;
-        picture_bus = backup_picture_bus;
-        cpu = backup_cpu;
-        ppu = backup_ppu;
+        load_state(&savedState);
     }
+
+    SavedState* save_state();
+    void load_state(SavedState* state);
+
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
+
+
 };
 
 }  // namespace NES

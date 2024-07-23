@@ -118,4 +118,42 @@ void MapperSxROM::writeCHR(NES_Address address, NES_Byte value) {
         LOG(Info) << "Read-only CHR memory write attempt at " << std::hex << address << std::endl;
 }
 
+
+/// Serializable
+
+void MapperSxROM::serialize(std::vector<uint8_t>& buffer) {
+    serialize_enum(mirroring, buffer);
+    serialize_bool(has_character_ram, buffer);
+    serialize_int(mode_chr, buffer);
+    serialize_int(mode_prg, buffer);
+    serialize_int(temp_register, buffer);
+    serialize_int(write_counter, buffer);
+    serialize_int(register_prg, buffer);
+    serialize_int(register_chr0, buffer);
+    serialize_int(register_chr1, buffer);
+    serialize_int(first_bank_prg, buffer);
+    serialize_int(second_bank_prg, buffer);
+    serialize_int(first_bank_chr, buffer);
+    serialize_int(second_bank_chr, buffer);
+    serialize_vector(character_ram, buffer);
+}
+
+std::span<uint8_t> MapperSxROM::deserialize(std::span<uint8_t> buffer) {
+    deserialize_enum(buffer, mirroring);
+    deserialize_bool(buffer, has_character_ram);
+    deserialize_int(buffer, mode_chr);
+    deserialize_int(buffer, mode_prg);
+    deserialize_int(buffer, temp_register);
+    deserialize_int(buffer, write_counter);
+    deserialize_int(buffer, register_prg);
+    deserialize_int(buffer, register_chr0);
+    deserialize_int(buffer, register_chr1);
+    deserialize_int(buffer, first_bank_prg);
+    deserialize_int(buffer, second_bank_prg);
+    deserialize_int(buffer, first_bank_chr);
+    deserialize_int(buffer, second_bank_chr);
+    deserialize_vector(buffer, character_ram);
+    return buffer;
+}
+
 }  // namespace NES

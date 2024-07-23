@@ -1,4 +1,5 @@
 """Test cases for the NESEnv class."""
+import time
 from unittest import TestCase
 import gymnasium as gym
 import numpy as np
@@ -45,9 +46,9 @@ class ShouldCreateInstanceOfNESEnv(TestCase):
         env.close()
 
 
-def create_smb1_instance(render_mode="human"):
+def create_smb1_instance(render_mode="human", headless=False):
     """Return a new SMB1 instance."""
-    return NESEnv(rom_file_abs_path("super-mario-bros-1.nes"), render_mode=render_mode)
+    return NESEnv(rom_file_abs_path("super-mario-bros-1.nes"), render_mode=render_mode, headless=headless)
 
 class ShouldReadAndWriteMemory(TestCase):
     def test(self):
@@ -73,7 +74,7 @@ class ShouldResetAndCloseEnv(TestCase):
 
 class ShouldStepEnv(TestCase):
     def test(self):
-        env = create_smb1_instance()
+        env = create_smb1_instance("rgb_array")
         done = True
         for _ in range(500):
             if done:
@@ -95,7 +96,7 @@ class ShouldStepEnv(TestCase):
             self.assertIsInstance(truncated, bool)
             self.assertIsInstance(info, dict)
             # check the render output
-            render = env.render('rgb_array')
+            render = env.render()
             self.assertIsInstance(render, np.ndarray)
         env.reset()
         env.close()
@@ -126,4 +127,86 @@ class ShouldStepEnvBackupRestore(TestCase):
         self.assertFalse(np.array_equal(backup, state))
         env._restore()
         self.assertTrue(np.array_equal(backup, env.screen))
+        
+        for _ in range(250):
+            if done:
+                state = env.reset()
+                done = False
+            state, _, done, _, _ = env.step(0)
+        
         env.close()
+
+class ShouldStepEnvSaveLoadState(TestCase):
+    def test(self):
+        done = True
+        env = create_smb1_instance()
+
+        for _ in range(250):
+            if done:
+                state, _ = env.reset()
+                done = False
+            state, _, terminated, truncated, _ = env.step(0)
+            done = terminated or truncated
+
+        backup = state.copy()
+
+        saved_state = env.save_state()
+
+        for _ in range(250):
+            if done:
+                state = env.reset()
+                done = False
+            state, _, done, _, _ = env.step(0)
+
+        self.assertFalse(np.array_equal(backup, state))
+        env.load_state(saved_state)
+        self.assertTrue(np.array_equal(backup, env.screen))
+
+        for _ in range(250):
+            if done:
+                state = env.reset()
+                done = False
+            state, _, done, _, _ = env.step(0)
+
+        env.close()
+
+class ShouldStepEnvSerializeDeserializeState(TestCase):
+    def test(self):
+        done = True
+        env = create_smb1_instance(headless=False)
+        env_2 = create_smb1_instance(headless=False)
+        env.reset()
+        env_2.reset()
+
+        # run 10 steps to boot the game
+        for _ in range(60):
+            env.step(0)
+        # press the start button
+        env.step(0b00001000)
+        # run further 10 steps
+        for _ in range(120):
+            state, _, terminated, truncated, _ = env.step(0)
+        # save the state
+        data = env.serialize()
+        backup = state.copy()
+        self.assertTrue(np.array_equal(backup, env.screen))
+        # run the env further
+        for i in range(10):
+            env.step(0)
+        self.assertFalse(np.array_equal(backup, env.screen))
+
+        # restore the state to env 2
+        for i in range(50):
+            t_0 = time.time()
+            _ = env_2.serialize()
+            env_2.reset()
+            env_2.deserialize(data)
+            self.assertTrue(np.array_equal(backup, env_2.screen))
+
+            for i in range(20):
+                env_2.step(0)
+            
+            assert time.time() - t_0 < 0.3
+
+            # the two env should be in sync
+            self.assertTrue(np.array_equal(env.screen, env_2.screen))

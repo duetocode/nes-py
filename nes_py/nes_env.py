@@ -45,7 +45,7 @@ _LIB.Width.restype = ctypes.c_uint
 _LIB.Height.argtypes = None
 _LIB.Height.restype = ctypes.c_uint
 # setup the argument and return types for Initialize
-_LIB.Initialize.argtypes = [ctypes.c_wchar_p]
+_LIB.Initialize.argtypes = [ctypes.c_wchar_p, ctypes.c_bool]
 _LIB.Initialize.restype = ctypes.c_void_p
 # setup the argument and return types for Controller
 _LIB.Controller.argtypes = [ctypes.c_void_p, ctypes.c_uint]
@@ -71,6 +71,20 @@ _LIB.Restore.restype = None
 # setup the argument and return types for Close
 _LIB.Close.argtypes = [ctypes.c_void_p]
 _LIB.Close.restype = None
+# setup the argument and return types for SaveState
+_LIB.SaveState.argtypes = [ctypes.c_void_p]
+_LIB.SaveState.restype = ctypes.c_void_p
+# setup the argument and return types for LoadState
+_LIB.LoadState.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+_LIB.LoadState.restype = None
+# setup serialization and deserialization functions
+_LIB.serialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+_LIB.serialize.restype = ctypes.POINTER(ctypes.c_uint8)
+_LIB.free_buffer.argtypes = [ctypes.POINTER(ctypes.c_uint8)]
+_LIB.free_buffer.restype = None
+_LIB.deserialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+_LIB.deserialize.restype = None
+
 
 # height in pixels of the NES screen
 SCREEN_HEIGHT = _LIB.Height()
@@ -115,7 +129,7 @@ class NESEnv(gym.Env):
     # action space is a bitmap of button press values for the 8 NES buttons
     action_space = Discrete(256)
 
-    def __init__(self, rom_path, render_mode='human'):
+    def __init__(self, rom_path, render_mode='human', headless: bool=False):
         """
         Create a new NES environment.
 
@@ -150,7 +164,7 @@ class NESEnv(gym.Env):
         # store the ROM path
         self._rom_path = rom_path
         # initialize the C++ object for running the environment
-        self._env = _LIB.Initialize(self._rom_path)
+        self._env = _LIB.Initialize(self._rom_path, headless)
         # setup a placeholder for a 'human' render mode viewer
         self.viewer = None
         # setup a placeholder for a pointer to a backup state
@@ -447,6 +461,24 @@ class NESEnv(gym.Env):
         """Return a list of actions meanings."""
         return ['NOOP']
 
+    def save_state(self) -> Any:
+        return _LIB.SaveState(self._env)
+
+    def load_state(self, state: Any):
+        _LIB.LoadState(self._env, state)
+
+    def serialize(self) -> bytes:
+        size = ctypes.c_size_t()
+        buf = _LIB.serialize(self._env, ctypes.byref(size))
+        serialized_data = bytes(buf[:size.value])
+        _LIB.free_buffer(buf)
+        return serialized_data
+
+    def deserialize(self, data: bytes):
+        buf = (ctypes.c_uint8 * len(data)).from_buffer_copy(data)
+        _LIB.deserialize(self._env, buf, len(data))
+
+    
 
 # explicitly define the outward facing API of this module
 __all__ = [NESEnv.__name__]

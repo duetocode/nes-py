@@ -47,7 +47,7 @@ typedef std::function<NES_Byte(void)> ReadCallback;
 typedef std::unordered_map<IORegisters, ReadCallback, EnumClassHash> IORegisterToReadCallbackMap;
 
 /// The main bus for data to travel along the NES hardware
-class MainBus {
+class MainBus : public Serializable{
  private:
     /// The RAM on the main bus
     std::vector<NES_Byte> ram;
@@ -63,6 +63,13 @@ class MainBus {
  public:
     /// Initialize a new main bus.
     MainBus() : ram(0x800, 0), mapper(nullptr) { }
+
+    ~MainBus();
+    MainBus(const MainBus& other);
+    MainBus(MainBus&& other) noexcept;
+    MainBus& operator=(const MainBus& other);
+    MainBus& operator=(MainBus&& other) noexcept;
+
 
     /// Return a 8-bit pointer to the RAM buffer's first address.
     ///
@@ -103,6 +110,16 @@ class MainBus {
 
     /// Return a pointer to the page in memory.
     const NES_Byte* get_page_pointer(NES_Byte page);
+
+    inline void clear_callbacks() {
+        write_callbacks.clear();
+        read_callbacks.clear();
+    }
+
+    /// Serializable
+
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
 };
 
 }  // namespace NES

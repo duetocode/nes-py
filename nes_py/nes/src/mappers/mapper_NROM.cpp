@@ -40,4 +40,23 @@ void MapperNROM::writeCHR(NES_Address address, NES_Byte value) {
             std::endl;
 }
 
+/// Serializable
+
+void MapperNROM::serialize(std::vector<uint8_t>& buffer) {
+    serialize_bool(is_one_bank, buffer);
+    serialize_bool(has_character_ram, buffer);
+    if (has_character_ram) {
+        serialize_vector(character_ram, buffer);
+    }
+}
+
+std::span<uint8_t> MapperNROM::deserialize(std::span<uint8_t> buffer) {
+    deserialize_bool(buffer, is_one_bank);
+    deserialize_bool(buffer, has_character_ram);
+    if (has_character_ram) {
+        deserialize_vector(buffer, character_ram);
+    }
+    return buffer;
+}
+
 }  // namespace NES

@@ -34,4 +34,20 @@ void Cartridge::loadFromFile(std::string path) {
     romFile.read(reinterpret_cast<char*>(&chr_rom[0]), 0x2000 * vbanks);
 }
 
+void Cartridge::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(prg_rom, buffer);
+    serialize_vector(chr_rom, buffer);
+    serialize_int(name_table_mirroring, buffer);
+    serialize_bool(has_extended_ram, buffer);
+}
+
+
+std::span<uint8_t> Cartridge::deserialize(std::span<uint8_t> buffer) {
+    buffer = deserialize_vector(buffer, prg_rom);
+    buffer = deserialize_vector(buffer, chr_rom);
+    deserialize_int(buffer, name_table_mirroring);
+    deserialize_bool(buffer, has_extended_ram);
+    return buffer;
+}
+
 }  // namespace NES

@@ -17,5 +17,16 @@ void MapperCNROM::writeCHR(NES_Address address, NES_Byte value) {
         address <<
         std::endl;
 }
+/// Serializable
 
+void MapperCNROM::serialize(std::vector<uint8_t>& buffer) {
+    serialize_bool(is_one_bank, buffer);
+    serialize_int(select_chr, buffer);
+}
+
+std::span<uint8_t> MapperCNROM::deserialize(std::span<uint8_t> buffer) {
+    deserialize_bool(buffer, is_one_bank);
+    deserialize_int(buffer, select_chr);
+    return buffer;
+}
 }  // namespace NES

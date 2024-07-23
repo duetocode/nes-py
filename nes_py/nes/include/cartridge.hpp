@@ -15,7 +15,7 @@
 namespace NES {
 
 /// A cartridge holding game ROM and a special hardware mapper emulation
-class Cartridge {
+class Cartridge : public Serializable {
  private:
     /// the PRG ROM
     std::vector<NES_Byte> prg_rom;
@@ -34,7 +34,7 @@ class Cartridge {
         name_table_mirroring(0),
         mapper_number(0),
         has_extended_ram(false) { }
-
+    
     /// Return the ROM data.
     const inline std::vector<NES_Byte>& getROM() { return prg_rom; }
 
@@ -52,6 +52,12 @@ class Cartridge {
 
     /// Load a ROM file into the cartridge and build the corresponding mapper.
     void loadFromFile(std::string path);
+
+
+    /// Serializable
+    void serialize(std::vector<uint8_t>& buffer) override;
+    std::span<uint8_t> deserialize(std::span<uint8_t> buffer) override;
+
 };
 
 }  // namespace NES

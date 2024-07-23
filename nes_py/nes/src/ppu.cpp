@@ -367,4 +367,268 @@ void PPU::set_scroll(NES_Byte scroll) {
     }
 }
 
+PPU::PPU(const PPU& other) :
+    vblank_callback(nullptr),
+    sprite_memory(other.sprite_memory),
+    scanline_sprites(other.scanline_sprites),
+
+    pipeline_state(other.pipeline_state),
+
+    cycles(other.cycles),
+    scanline(other.scanline),
+    is_even_frame(other.is_even_frame),
+    /// Status
+    is_vblank(other.is_vblank),
+    is_sprite_zero_hit(other.is_sprite_zero_hit),
+    /// Registers
+    data_address(other.data_address),
+    temp_address(other.temp_address),
+    fine_x_scroll(other.fine_x_scroll),
+    is_first_write(other.is_first_write),
+    data_buffer(other.data_buffer),
+    sprite_data_address(other.sprite_data_address),
+    /// Mask
+    is_showing_sprites(other.is_showing_sprites),
+    is_showing_background(other.is_showing_background),
+    is_hiding_edge_sprites(other.is_hiding_edge_sprites),
+    is_hiding_edge_background(other.is_hiding_edge_background),
+    /// Setup flags and variables
+    is_long_sprites(other.is_long_sprites),
+    is_interrupting(other.is_interrupting),
+
+    background_page(other.background_page),
+    sprite_page(other.sprite_page),
+
+    data_address_increment(other.data_address_increment){
+    
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            screen[i][j] = other.screen[i][j];
+        }
+    }
+    
+}
+
+PPU::PPU(PPU&& other) noexcept:
+    vblank_callback(other.vblank_callback),
+    sprite_memory(std::move(other.sprite_memory)),
+    scanline_sprites(std::move(other.scanline_sprites)),
+
+    pipeline_state(other.pipeline_state),
+
+    cycles(other.cycles),
+    scanline(other.scanline),
+    is_even_frame(other.is_even_frame),
+    /// Status
+    is_vblank(other.is_vblank),
+    is_sprite_zero_hit(other.is_sprite_zero_hit),
+    /// Registers
+    data_address(other.data_address),
+    temp_address(other.temp_address),
+    fine_x_scroll(other.fine_x_scroll),
+    is_first_write(other.is_first_write),
+    data_buffer(other.data_buffer),
+    sprite_data_address(other.sprite_data_address),
+    /// Mask
+    is_showing_sprites(other.is_showing_sprites),
+    is_showing_background(other.is_showing_background),
+    is_hiding_edge_sprites(other.is_hiding_edge_sprites),
+    is_hiding_edge_background(other.is_hiding_edge_background),
+    /// Setup flags and variables
+    is_long_sprites(other.is_long_sprites),
+    is_interrupting(other.is_interrupting),
+
+    background_page(other.background_page),
+    sprite_page(other.sprite_page),
+
+    data_address_increment(other.data_address_increment){
+    
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            screen[i][j] = other.screen[i][j];
+        }
+    }
+
+    other.vblank_callback = nullptr;
+    other.sprite_memory.clear();
+    other.scanline_sprites.clear();
+}
+
+PPU& PPU::operator=(const PPU& other) {
+    if (this == &other) return *this;
+
+    vblank_callback = nullptr;
+    sprite_memory = other.sprite_memory;
+    scanline_sprites = other.scanline_sprites;
+
+    pipeline_state = other.pipeline_state;
+
+    cycles = other.cycles;
+    scanline = other.scanline;
+    is_even_frame = other.is_even_frame;
+    /// Status
+    is_vblank = other.is_vblank;
+    is_sprite_zero_hit = other.is_sprite_zero_hit;
+    /// Registers
+    data_address = other.data_address;
+    temp_address = other.temp_address;
+    fine_x_scroll = other.fine_x_scroll;
+    is_first_write = other.is_first_write;
+    data_buffer = other.data_buffer;
+    sprite_data_address = other.sprite_data_address;
+    /// Mask
+    is_showing_sprites = other.is_showing_sprites;
+    is_showing_background = other.is_showing_background;
+    is_hiding_edge_sprites = other.is_hiding_edge_sprites;
+    is_hiding_edge_background = other.is_hiding_edge_background;
+    /// Setup flags and variables
+    is_long_sprites = other.is_long_sprites;
+    is_interrupting = other.is_interrupting;
+
+    background_page = other.background_page;
+    sprite_page = other.sprite_page;
+
+    data_address_increment = other.data_address_increment;
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            screen[i][j] = other.screen[i][j];
+        }
+    }
+
+    return *this;
+}
+
+PPU& PPU::operator=(PPU&& other) noexcept{
+    if (this == &other) return *this;
+
+    vblank_callback = other.vblank_callback;
+    sprite_memory = std::move(other.sprite_memory);
+    scanline_sprites = std::move(other.scanline_sprites);
+
+    pipeline_state = other.pipeline_state;
+
+    cycles = other.cycles;
+    scanline = other.scanline;
+    is_even_frame = other.is_even_frame;
+    /// Status
+    is_vblank = other.is_vblank;
+    is_sprite_zero_hit = other.is_sprite_zero_hit;
+    /// Registers
+    data_address = other.data_address;
+    temp_address = other.temp_address;
+    fine_x_scroll = other.fine_x_scroll;
+    is_first_write = other.is_first_write;
+    data_buffer = other.data_buffer;
+    sprite_data_address = other.sprite_data_address;
+    /// Mask
+    is_showing_sprites = other.is_showing_sprites;
+    is_showing_background = other.is_showing_background;
+    is_hiding_edge_sprites = other.is_hiding_edge_sprites;
+    is_hiding_edge_background = other.is_hiding_edge_background;
+    /// Setup flags and variables
+    is_long_sprites = other.is_long_sprites;
+    is_interrupting = other.is_interrupting;
+
+    background_page = other.background_page;
+    sprite_page = other.sprite_page;
+
+    data_address_increment = other.data_address_increment;
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            screen[i][j] = other.screen[i][j];
+        }
+    }
+
+    other.vblank_callback = nullptr;
+    other.sprite_memory.clear();
+    other.scanline_sprites.clear();
+    
+    return *this;
+}
+
+void PPU::serialize(std::vector<uint8_t>& buffer) {
+    serialize_vector(sprite_memory, buffer);
+    serialize_vector(scanline_sprites, buffer);
+
+    serialize_enum(pipeline_state, buffer);
+
+    serialize_int(cycles, buffer);
+    serialize_int(scanline, buffer);
+    serialize_bool(is_even_frame, buffer);
+    /// Status
+    serialize_bool(is_vblank, buffer);
+    serialize_bool(is_sprite_zero_hit, buffer);
+    /// Registers
+    serialize_int(data_address, buffer);
+    serialize_int(temp_address, buffer);
+    serialize_int(fine_x_scroll, buffer);
+    serialize_bool(is_first_write, buffer);
+    serialize_int(data_buffer, buffer);
+    serialize_int(sprite_data_address, buffer);
+    /// Mask
+    serialize_bool(is_showing_sprites, buffer);
+    serialize_bool(is_showing_background, buffer);
+    serialize_bool(is_hiding_edge_sprites, buffer);
+    serialize_bool(is_hiding_edge_background, buffer);
+    /// Setup flags and variables
+    serialize_bool(is_long_sprites, buffer);
+    serialize_bool(is_interrupting, buffer);
+
+    serialize_enum(background_page, buffer);
+    serialize_enum(sprite_page, buffer);
+
+    serialize_int(data_address_increment, buffer);
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            serialize_int(screen[i][j], buffer);
+        }
+    }
+}
+
+std::span<uint8_t> PPU::deserialize(std::span<uint8_t> buffer) {
+    buffer = deserialize_vector(buffer, sprite_memory);
+    buffer = deserialize_vector(buffer, scanline_sprites);
+
+    deserialize_enum(buffer, pipeline_state);
+
+    deserialize_int(buffer, cycles);
+    deserialize_int(buffer, scanline);
+    deserialize_bool(buffer, is_even_frame);
+    /// Status
+    deserialize_bool(buffer, is_vblank);
+    deserialize_bool(buffer, is_sprite_zero_hit);
+    /// Registers
+    deserialize_int(buffer, data_address);
+    deserialize_int(buffer, temp_address);
+    deserialize_int(buffer, fine_x_scroll);
+    deserialize_bool(buffer, is_first_write);
+    deserialize_int(buffer, data_buffer);
+    deserialize_int(buffer, sprite_data_address);
+    /// Mask
+    deserialize_bool(buffer, is_showing_sprites);
+    deserialize_bool(buffer, is_showing_background);
+    deserialize_bool(buffer, is_hiding_edge_sprites);
+    deserialize_bool(buffer, is_hiding_edge_background);
+    /// Setup flags and variables
+    deserialize_bool(buffer, is_long_sprites);
+    deserialize_bool(buffer, is_interrupting);
+
+    deserialize_enum(buffer, background_page);
+    deserialize_enum(buffer, sprite_page);
+
+    deserialize_int(buffer, data_address_increment);
+
+    for (int i = 0; i < VISIBLE_SCANLINES; i++) {
+        for (int j = 0; j < SCANLINE_VISIBLE_DOTS; j++) {
+            deserialize_int(buffer, screen[i][j]);
+        }
+    }
+
+    return buffer;
+}
+
+
 }  // namespace NES

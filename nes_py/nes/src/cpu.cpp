@@ -560,4 +560,46 @@ void CPU::cycle(MainBus &bus) {
         std::cout << "failed to execute opcode: " << std::hex << +op << std::endl;
 }
 
+/// Serializable
+void CPU::serialize(std::vector<uint8_t>& buffer) {
+    // std::cerr << "S: register_PC = " << register_PC << std::endl;
+    serialize_int(register_PC, buffer);
+    // std::cerr << "S: register_SP = " << static_cast<int>(register_SP) << std::endl;
+    serialize_int(register_SP, buffer);
+    // std::cerr << "S: register_A = " << static_cast<int>(register_A) << std::endl;
+    serialize_int(register_A, buffer);
+    // std::cerr << "S: register_X = " << static_cast<int>(register_X) << std::endl;
+    serialize_int(register_X, buffer);
+    // std::cerr << "S: register_Y = " << static_cast<int>(register_Y) << std::endl;
+    serialize_int(register_Y, buffer);
+    // std::cerr << "S: flags.byte = " << static_cast<int>(flags.byte) << std::endl;
+    serialize_int(flags.byte, buffer);
+    // std::cerr << "S: skip_cycles = " << skip_cycles << std::endl;
+    serialize_int(skip_cycles, buffer);
+    // std::cerr << "S: cycles = " << cycles << std::endl;
+    serialize_int(cycles, buffer);
+}
+
+std::span<uint8_t> CPU::deserialize(std::span<uint8_t> buffer) {
+    deserialize_int(buffer, register_PC);
+    // std::cerr << "D: register_PC = " << register_PC << std::endl;
+    deserialize_int(buffer, register_SP);
+    // std::cerr << "D: register_SP = " << static_cast<int>(register_SP) << std::endl;
+    deserialize_int(buffer, register_A);
+    // std::cerr << "D: register_A = " << static_cast<int>(register_A) << std::endl;
+    deserialize_int(buffer, register_X);
+    // std::cerr << "D: register_X = " << static_cast<int>(register_X) << std::endl;
+    deserialize_int(buffer, register_Y);
+    // std::cerr << "D: register_Y = " << static_cast<int>(register_Y) << std::endl;
+    deserialize_int<NES_Byte>(buffer, flags.byte);
+    // std::cerr << "D: flags.byte = " << static_cast<int>(flags.byte) << std::endl;
+    deserialize_int(buffer, skip_cycles);
+    // std::cerr << "D: skip_cycles = " << skip_cycles << std::endl;
+    deserialize_int(buffer, cycles);
+    // std::cerr << "D: cycles = " << cycles << std::endl;
+
+    // register_Y = 0;
+
+    return buffer;
+}
 }  // namespace NES
